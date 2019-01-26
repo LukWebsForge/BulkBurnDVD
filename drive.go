@@ -9,16 +9,25 @@ import (
 )
 
 type DvdDrive struct {
-	number string
-	speed  int
+	id    string
+	speed int
 }
 
 func (d *DvdDrive) file() string {
-	return "/dev/sr" + d.number
+	return "/dev/disk/by-id/" + d.id
 }
 
 func (d *DvdDrive) isTrayOpen() (bool, error) {
-	return isNativeTrayOpen(d.file()), nil
+	open, err := isNativeTrayOpen(d.file())
+	if err != nil {
+		return false, err
+	}
+	return open, nil
+}
+
+func (d *DvdDrive) openTray() error {
+	cmd := exec.Command("eject", d.file())
+	return cmd.Run()
 }
 
 func (d *DvdDrive) write(isoFile string) (string, error) {

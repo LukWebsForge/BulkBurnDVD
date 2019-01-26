@@ -5,6 +5,7 @@
 #include <linux/cdrom.h>
 #include <unistd.h>
 
+// https://askubuntu.com/a/483721
 int trayOpen(char *device) {
     int cdrom;
 
@@ -21,4 +22,6 @@ int trayOpen(char *device) {
         close(cdrom);
         return 0;
     }
+
+    return 1;
 }
