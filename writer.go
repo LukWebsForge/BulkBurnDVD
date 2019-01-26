@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -30,11 +29,6 @@ func main() {
 	wait := sync.WaitGroup{}
 	wait.Add(1)
 	wait.Wait()
-}
-
-func printOpen(drive *DvdDrive) {
-	open, _ := drive.isTrayOpen()
-	fmt.Printf("The drive at %v: %v\n", drive.file(), open)
 }
 
 func writeLoop(drive *DvdDrive) {

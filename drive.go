@@ -18,16 +18,6 @@ func (d *DvdDrive) file() string {
 }
 
 func (d *DvdDrive) isTrayOpen() (bool, error) {
-	/* cmd := exec.Command("isoinfo", "-i"+d.file())
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		if err.Error() != "exit status 1" {
-			return false, err
-		}
-	}
-
-	return strings.Contains(string(out), "tray open"), nil */
 	return isNativeTrayOpen(d.file()), nil
 }
 
