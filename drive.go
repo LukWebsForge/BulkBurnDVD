@@ -2,10 +2,10 @@ package main
 
 import "C"
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 type DvdDrive struct {
@@ -45,26 +45,25 @@ func (d *DvdDrive) write(isoFile string) (string, error) {
 	return string(output), nil
 }
 
-// Not fully tested and not in use
+// Tested, but not in use
 func (d *DvdDrive) md5CheckDisk(isoFile string) (bool, error) {
 	info, err := os.Stat(isoFile)
 	if err != nil {
 		return false, err
 	}
 
-	blocks := int64(info.Size() / 2048)
-	cmd := exec.Command("bash", "-c 'dd if="+d.file()+" bs=2048 count="+string(blocks)+" | md5sum'")
+	blocks := int(info.Size() / 2048)
+	cmd := exec.Command("/bin/bash", "-c", "dd if="+d.file()+" bs=2048 count="+strconv.Itoa(blocks)+" | md5sum")
 	outDvd, err := cmd.CombinedOutput()
 	if err != nil {
 		return false, err
 	}
 
-	outFile, err := exec.Command("md5sum " + isoFile).CombinedOutput()
+	outFile, err := exec.Command("md5sum", isoFile).CombinedOutput()
 	if err != nil {
 		return false, err
 	}
 
-	fmt.Printf("DVD Hash: %v\nFile Hash: %v", string(outDvd), string(outFile))
-
-	return string(outDvd) == string(outFile), nil
+	hash := strings.Split(string(outFile), " ")[0]
+	return strings.Contains(string(outDvd), hash), nil
 }
