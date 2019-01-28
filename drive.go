@@ -45,6 +45,7 @@ func (d *DvdDrive) write(isoFile string) (string, error) {
 	return string(output), nil
 }
 
+// Not fully tested and not in use
 func (d *DvdDrive) md5CheckDisk(isoFile string) (bool, error) {
 	info, err := os.Stat(isoFile)
 	if err != nil {
@@ -65,5 +66,5 @@ func (d *DvdDrive) md5CheckDisk(isoFile string) (bool, error) {
 
 	fmt.Printf("DVD Hash: %v\nFile Hash: %v", string(outDvd), string(outFile))
 
-	return true, nil
+	return string(outDvd) == string(outFile), nil
 }

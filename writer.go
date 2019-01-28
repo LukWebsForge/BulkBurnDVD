@@ -7,23 +7,29 @@ import (
 	"time"
 )
 
+// TODO: Set your own path the ISO file you want to burn
 const IsoFile string = "/home/lukas/Documents/dvd.iso"
 
 // https://wiki.debian.org/CDDVD
 func main() {
-	// https://www.cnet.com/products/sony-optiarc-ad-7740h-dvdrw-r-dl-dvd-ram-drive-serial-ata-series
-	driveZero := DvdDrive{
-		id:    "ata-Optiarc_DVD_RW_AD-7740H",
-		speed: 8, // 8
-	}
-	// https://images-eu.ssl-images-amazon.com/images/I/71duhj7GTNS.pdf
-	driveOne := DvdDrive{
-		id:    "usb-TSSTcorp_CDDVDW_SE-208DB_R8X76GAC902VPR-0:0",
-		speed: 8, // 8
-	}
 
-	go writeLoop(&driveZero)
-	go writeLoop(&driveOne)
+	// TODO: Customize the settings of your DvdDrive
+	// You can add more drives by copying the following lines and changing the properties
+	go writeLoop(&DvdDrive{
+		// You can find out the id of your drive via 'ls /dev/disk/by-id/'.
+		// If you've got no idea how your drive could be called
+		// use a burn program with a GUI and check the available drives.
+		id: "ata-Optiarc_DVD_RW_AD-7740H",
+		// You can find out the write speed of your drive via the device documentation.
+		// Just google the you've got from 'ls /dev/disk/by-id/'
+		// DIRTY HACK: Use a burn program with a GUI like XfBurn
+		// and look for the maximum speed you can select
+		speed: 8,
+	})
+
+	// You're done. Run the program with 'go run ./..'
+
+	log.Println("Ready. Put your DVDs into the configured drives and let them burn!")
 
 	wait := sync.WaitGroup{}
 	wait.Add(1)
