@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -15,23 +16,14 @@ func main() {
 		id:    "ata-Optiarc_DVD_RW_AD-7740H",
 		speed: 8, // 8
 	}
-	// https://www.lg.com/us/computer-products/pdf/h_gh22lp20_spec_sheet.pdf
-	/* driveOne := DvdDrive{
-		id:    "usb-HL-DT-ST_DVD-RAM_GH22LP20-0:0",
-		speed: 4, // 22 -> 16
-	} */
 	// https://images-eu.ssl-images-amazon.com/images/I/71duhj7GTNS.pdf
-	driveTwo := DvdDrive{
+	driveOne := DvdDrive{
 		id:    "usb-TSSTcorp_CDDVDW_SE-208DB_R8X76GAC902VPR-0:0",
 		speed: 8, // 8
 	}
 
 	go writeLoop(&driveZero)
-	// go writeLoop(&driveOne)
-	go writeLoop(&driveTwo)
-
-	driveZero.openTray()
-	driveTwo.openTray()
+	go writeLoop(&driveOne)
 
 	wait := sync.WaitGroup{}
 	wait.Add(1)
@@ -39,11 +31,12 @@ func main() {
 }
 
 func writeLoop(drive *DvdDrive) {
+	l := log.New(os.Stderr, "["+drive.file()+"] ", log.Ltime)
 	for true {
 		for true {
 			open, err := drive.isTrayOpen()
 			if err != nil {
-				log.Printf("[%v] Error while checking tray status: %v\n", drive.file(), err)
+				l.Printf("Error while checking tray status: %v\n", err)
 			}
 
 			if !open {
@@ -53,16 +46,25 @@ func writeLoop(drive *DvdDrive) {
 			time.Sleep(time.Duration(200 * time.Millisecond))
 		}
 
-		log.Printf("[%v] Tray closed. Starting write...\n", drive.file())
+		l.Println("Tray closed. Starting write...")
 
 		time.Sleep(time.Duration(30 * time.Second))
 
+		open, _ := drive.isTrayOpen()
+		if open {
+			l.Println("Aborting write, because tray is open")
+			continue
+		}
+
 		writeLog, err := drive.write(IsoFile)
 		if err != nil {
-			log.Printf("[%v] Write failed: %v\n%v", drive.file(), err, writeLog)
-			drive.openTray()
+			l.Printf("Write failed: %v\n%v", err, writeLog)
+			_ = drive.openTray()
 		} else {
-			log.Printf("[%v] Write successful. Waiting for next disk...", drive.file())
+			l.Println("Write successful. Waiting for next disk...")
 		}
+
+		// Without the delay the tray could be still closed
+		time.Sleep(time.Duration(time.Second))
 	}
 }

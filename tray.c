@@ -23,5 +23,6 @@ int trayOpen(char *device) {
         return 0;
     }
 
+    close(cdrom);
     return 1;
 }
